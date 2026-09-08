@@ -158,4 +158,3 @@ Add `'use client'` only when the component uses: `useState`, `useEffect`, `useRe
 - [ ] Team sections use CSS avatars with initials, not image tags
 - [ ] Every `'use client'` directive has quotes (bare `use client` → build error)
 - [ ] next build passes (no TypeScript errors)
-
