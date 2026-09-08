@@ -1,3 +1,5 @@
+'use client';
+import { useState } from 'react';
 import Image from 'next/image'
 import ArrowRight from 'lucide-react/icons/arrow-right'
 import Award from 'lucide-react/icons/award'
@@ -32,6 +34,110 @@ const services = [
   { icon: ShieldCheck, title: 'Gestión Patrimonial', text: 'Protegemos y hacemos crecer tu patrimonio con soluciones integrales.' },
 ]
 function Brand() { return <a href="#inicio" className="brand" aria-label="Raíz Propiedades"><span className="monogram">R</span><span><b>Raíz</b> Propiedades <small>v2</small></span></a> }
+
+function ContactSection() {
+  const [form, setForm] = useState({
+    nombre: '', email: '', telefono: '',
+    tipo: '', presupuesto: '', zonas: '', mensaje: ''
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_CONSTRUCTOR_API}/v1/forms/${process.env.NEXT_PUBLIC_PROJECT_ID}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) }
+      );
+      setSubmitted(true);
+    } catch {}
+    setLoading(false);
+  };
+
+  return (
+    <section id="contacto" style={{ padding: '5rem 2rem', background: '#f8f8f6' }}>
+      <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <p style={{ color: '#c8a96e', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Asesoría gratuita</p>
+          <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: '#1a3a5c', margin: 0 }}>Solicita tu Asesoría</h2>
+        </div>
+
+        {submitted ? (
+          <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: '0.75rem', padding: '2rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✓</div>
+            <h3 style={{ color: '#065f46', margin: '0 0 0.5rem', fontSize: '1.5rem', fontWeight: 700 }}>Solicitud recibida</h3>
+            <p style={{ color: '#047857', margin: 0 }}>Un asesor te contactará en menos de 2 horas.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
+            {[
+              { id: 'nombre', label: 'Nombre completo', type: 'text', required: true, col: 2 },
+              { id: 'email', label: 'Email', type: 'email', required: true, col: 1 },
+              { id: 'telefono', label: 'Teléfono / WhatsApp', type: 'tel', required: false, col: 1 },
+              { id: 'presupuesto', label: 'Presupuesto aproximado', type: 'text', required: false, col: 1 },
+              { id: 'zonas', label: 'Zonas de interés', type: 'text', required: false, col: 1 },
+            ].map(f => (
+              <div key={f.id} style={{ gridColumn: f.col === 2 ? '1 / -1' : 'span 1' }}>
+                <label style={{ display: 'block', color: '#374151', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>
+                  {f.label}{f.required ? ' *' : ''}
+                </label>
+                <input
+                  type={f.type}
+                  required={f.required}
+                  value={(form as any)[f.id]}
+                  onChange={e => setForm(p => ({ ...p, [f.id]: e.target.value }))}
+                  style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.75rem 1rem', fontSize: '1rem', boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+                />
+              </div>
+            ))}
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', color: '#374151', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Tipo de operación</label>
+              <select
+                value={form.tipo}
+                onChange={e => setForm(p => ({ ...p, tipo: e.target.value }))}
+                style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.75rem 1rem', fontSize: '1rem', background: '#fff', color: '#111827' }}
+              >
+                <option value="">Selecciona una opción</option>
+                <option value="Compra">Compra</option>
+                <option value="Renta">Renta</option>
+                <option value="Inversión">Inversión</option>
+                <option value="Asesoría">Asesoría</option>
+              </select>
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', color: '#374151', marginBottom: '0.375rem', fontSize: '0.875rem', fontWeight: 500 }}>Mensaje (opcional)</label>
+              <textarea
+                rows={3}
+                value={form.mensaje}
+                onChange={e => setForm(p => ({ ...p, mensaje: e.target.value }))}
+                style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.75rem 1rem', fontSize: '1rem', resize: 'vertical', boxSizing: 'border-box', background: '#fff', color: '#111827' }}
+              />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%', background: loading ? '#9ca3af' : '#1a3a5c', color: '#fff',
+                  padding: '1rem', borderRadius: '0.5rem', fontWeight: 700, fontSize: '1rem',
+                  border: 'none', cursor: loading ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {loading ? 'Enviando...' : 'Solicitar asesoría'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return <main>
     <header className="header"><Brand/><nav aria-label="Navegación principal"><a href="#propiedades">Propiedades</a><a href="#servicios">Servicios</a><a href="#nosotros">Nosotros</a><a href="#blog">Blog</a><a href="#contacto">Contacto</a></nav><a className="goldButton headerCta" href="#contacto">Valuar mi propiedad</a><Menu className="menuIcon" aria-label="Abrir menú"/></header>
